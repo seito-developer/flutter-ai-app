@@ -59,17 +59,17 @@ class _MyHomePageState extends State<MyHomePage> {
 
   String _title = "";
   late final _textEditingController =
-      TextEditingController(text: "次の文章をタイ語にしてほしい：" + _title);
+      TextEditingController(text: "次のテキストをタイ語に変換：" + _title);
   var _answer = "";
   var _isLoading = false;
 
   static List<Color> colors = [
-    // Colors.white.withOpacity(0.8),
+    Colors.white.withOpacity(0.8),
     Colors.red.withOpacity(0.2),
-    // Colors.green.withOpacity(0.2),
+    Colors.green.withOpacity(0.2),
     Colors.blue.withOpacity(0.2),
     Colors.yellow.withOpacity(0.2),
-    // Colors.cyan.withOpacity(0.2),
+    Colors.cyan.withOpacity(0.2),
   ];
 
   int _selectedColor = 0;
@@ -161,6 +161,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 8.0, vertical: 4.0),
                                 child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Transform.scale(
                                       scale: 1.5,
@@ -287,7 +288,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               );
                               final newTodo = Todo(
                                 id: '',
-                                title: answer,
+                                title: answer.trim().replaceAll('\n', ''),
                                 isDone: false,
                                 colorNo: _selectedColor,
                                 deadlineTime: _selectedDateTime,
@@ -299,22 +300,6 @@ class _MyHomePageState extends State<MyHomePage> {
                               }
                             },
                       child: const Text('追加')),
-                  // ElevatedButton(
-                  //     onPressed: _textEditingController.text.isEmpty
-                  //         ? null
-                  //         : () async {
-                  //             final answer = await _sendMessage(
-                  //               _textEditingController.text,
-                  //             );
-                  //             setState(() {
-                  //               _answer = answer;
-                  //               _isLoading = false;
-                  //             });
-                  //             // if (context.mounted) {
-                  //             //   Navigator.pop(context);
-                  //             // }
-                  //           },
-                  //     child: const Text('AI')),
                 ],
               );
             }),

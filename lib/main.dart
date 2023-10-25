@@ -57,7 +57,9 @@ class _MyHomePageState extends State<MyHomePage> {
     // isLogger: true,
   );
 
-  final _textEditingController = TextEditingController(text: '「こんにちは」を英語で言うと？');
+  String _title = "";
+  late final _textEditingController =
+      TextEditingController(text: "次の文章をタイ語にしてほしい：" + _title);
   var _answer = "";
   var _isLoading = false;
 
@@ -70,7 +72,6 @@ class _MyHomePageState extends State<MyHomePage> {
     // Colors.cyan.withOpacity(0.2),
   ];
 
-  String _title = '';
   int _selectedColor = 0;
   DateTime? _selectedDateTime = DateTime.now();
   final formatDate = DateFormat('yyyy/MM/dd');
@@ -208,7 +209,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void _onAddTodo() {
     _selectedColor = 0;
     _selectedDateTime = null;
-    _title = '';
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -282,9 +282,12 @@ class _MyHomePageState extends State<MyHomePage> {
                       onPressed: _title.isEmpty
                           ? null
                           : () async {
+                              final answer = await _sendMessage(
+                                _textEditingController.text,
+                              );
                               final newTodo = Todo(
                                 id: '',
-                                title: _title,
+                                title: answer,
                                 isDone: false,
                                 colorNo: _selectedColor,
                                 deadlineTime: _selectedDateTime,
@@ -296,22 +299,22 @@ class _MyHomePageState extends State<MyHomePage> {
                               }
                             },
                       child: const Text('追加')),
-                  ElevatedButton(
-                      onPressed: _textEditingController.text.isEmpty
-                          ? null
-                          : () async {
-                              final answer = await _sendMessage(
-                                _textEditingController.text,
-                              );
-                              setState(() {
-                                _answer = answer;
-                                _isLoading = false;
-                              });
-                              // if (context.mounted) {
-                              //   Navigator.pop(context);
-                              // }
-                            },
-                      child: const Text('AI')),
+                  // ElevatedButton(
+                  //     onPressed: _textEditingController.text.isEmpty
+                  //         ? null
+                  //         : () async {
+                  //             final answer = await _sendMessage(
+                  //               _textEditingController.text,
+                  //             );
+                  //             setState(() {
+                  //               _answer = answer;
+                  //               _isLoading = false;
+                  //             });
+                  //             // if (context.mounted) {
+                  //             //   Navigator.pop(context);
+                  //             // }
+                  //           },
+                  //     child: const Text('AI')),
                 ],
               );
             }),

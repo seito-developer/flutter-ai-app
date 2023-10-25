@@ -206,6 +206,17 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             TextField(
               onChanged: (value) => _title = value,
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
+              // can you add padding here?
+              // padding: const EdgeInsets.all(16.0),
+
+              decoration: InputDecoration(
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 20,
+                  horizontal: 5,
+                ),
+              ),
             ),
             StatefulBuilder(builder: (context, setStateInSheet) {
               return Row(

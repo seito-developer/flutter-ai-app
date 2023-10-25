@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "257110797951",
+    "project_id": "seito-flutter-ai-app",
+    "storage_bucket": "seito-flutter-ai-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:257110797951:android:5dec704f0b159232ccd94a",
+        "android_client_info": {
+          "package_name": "com.example.firebase_todo_list"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPg_fef34UhPpu3b96bCmne7y6Y0unJZM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:257110797951:android:11d65ca5916adfe2ccd94a",
+        "android_client_info": {
+          "package_name": "com.example.flutter_ai_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPg_fef34UhPpu3b96bCmne7y6Y0unJZM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

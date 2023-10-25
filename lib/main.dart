@@ -57,7 +57,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // isLogger: true,
   );
 
-  final _textEditingController = TextEditingController(text: 'こんにちは？');
+  final _textEditingController = TextEditingController(text: '「こんにちは」を英語で言うと？');
   var _answer = "";
   var _isLoading = false;
 
@@ -297,7 +297,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             },
                       child: const Text('追加')),
                   ElevatedButton(
-                      onPressed: _title.isEmpty
+                      onPressed: _textEditingController.text.isEmpty
                           ? null
                           : () async {
                               final answer = await _sendMessage(
@@ -307,9 +307,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                 _answer = answer;
                                 _isLoading = false;
                               });
-                              if (context.mounted) {
-                                Navigator.pop(context);
-                              }
+                              // if (context.mounted) {
+                              //   Navigator.pop(context);
+                              // }
                             },
                       child: const Text('AI')),
                 ],

@@ -1,7 +1,7 @@
-import 'package:english_words/english_words.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+
 import 'firebase_options.dart';
 
 void main() async {
@@ -9,86 +9,80 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => MyAppState(),
-      child: MaterialApp(
-        title: 'Namer App',
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
-        ),
-        home: MyHomePage(),
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
       ),
+      home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
-class MyAppState extends ChangeNotifier {
-  var current = WordPair.random();
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key, required this.title});
 
-  void getNext() {
-    current = WordPair.random();
-    notifyListeners();
-  }
+  final String title;
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class MyHomePage extends StatelessWidget {
+class _MyHomePageState extends State<MyHomePage> {
+  final _collection = FirebaseFirestore.instance.collection('counter');
+  void _incrementCounter() async {
+    final currentData = await _collection.doc('data').get();
+    final counter = currentData['data'] as int;
+    _collection.doc('data').update({'data': counter + 1});
+  }
+
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-    var pair = appState.current;
-
     return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text('A random AWESOME idea:'),
-          BigCard(pair: pair),
-          SizedBox(height: 10),
-          ElevatedButton(
-            onPressed: () {
-              appState.getNext();
-            },
-            child: Text('Next'),
-          ),
-        ],
+      appBar: AppBar(
+        title: Text(widget.title),
       ),
-    );
-  }
-}
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const Text(
+              'You have pushed the button this many times:',
+            ),
+            StreamBuilder(
+                stream: _collection.snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Text(snapshot.error.toString());
+                  }
+                  if (!snapshot.hasData) {
+                    return const CircularProgressIndicator();
+                  }
 
-class BigCard extends StatelessWidget {
-  const BigCard({
-    super.key,
-    required this.pair,
-  });
+                  final data = snapshot.data!;
+                  final counter = data.docs[0]['data'];
 
-  final WordPair pair;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context); // ← Add this.
-    final style = theme.textTheme.displayMedium!.copyWith(
-      color: theme.colorScheme.onPrimary,
-    );
-
-    return Card(
-      color: theme.colorScheme.primary, // ← And also this.
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Text(
-          pair.asLowerCase,
-          style: style,
-          semanticsLabel: "${pair.first} ${pair.second}",
+                  return Text(
+                    '$counter',
+                    style: Theme.of(context).textTheme.headline4,
+                  );
+                })
+          ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _incrementCounter,
+        tooltip: 'Increment',
+        child: const Icon(Icons.add),
       ),
     );
   }

@@ -69,6 +69,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final _todoRepository = TodoRepository('user');
 
+  bool _visibleDoneItem = false;
+  bool _descending = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,11 +80,47 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Transform.scale(
+                      scale: 1.5,
+                      child: Checkbox(
+                          value: _visibleDoneItem,
+                          onChanged: (value) {
+                            if (value == null) {
+                              return;
+                            }
+                            setState(() {
+                              _visibleDoneItem = value;
+                            });
+                          }),
+                    ),
+                    const Text('実施済みも表示'),
+                  ],
+                ),
+                ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _descending = !_descending;
+                      });
+                    },
+                    child: Text(_descending ? '締切 遅い' : '締切 早い'))
+              ],
+            ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: StreamBuilder(
-                    stream: _todoRepository.stream().snapshots(),
+                    stream: _todoRepository
+                        .stream(
+                          isDone: _visibleDoneItem ? null : false,
+                          sortMethod: SortMethod.deadlineTime,
+                          descending: _descending,
+                        )
+                        .snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
                         return Text('Error: ${snapshot.error}');
@@ -95,36 +134,48 @@ class _MyHomePageState extends State<MyHomePage> {
                       return ListView.builder(
                         itemCount: todo.length,
                         itemBuilder: (BuildContext context, int index) {
-                          return Container(
-                            decoration: BoxDecoration(
-                              color: colors[todo[index].colorNo],
-                              borderRadius: BorderRadius.vertical(
-                                top: index == 0 ? circularEdge : Radius.zero,
-                                bottom: index == todo.length - 1
-                                    ? circularEdge
-                                    : Radius.zero,
+                          return GestureDetector(
+                            onLongPress: () => _onTodoLongPressed(todo[index]),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: colors[todo[index].colorNo],
+                                borderRadius: BorderRadius.vertical(
+                                  top: index == 0 ? circularEdge : Radius.zero,
+                                  bottom: index == todo.length - 1
+                                      ? circularEdge
+                                      : Radius.zero,
+                                ),
                               ),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8.0, vertical: 4.0),
-                              child: Row(
-                                children: [
-                                  Transform.scale(
-                                    scale: 1.5,
-                                    child: Checkbox(
-                                      value: todo[index].isDone,
-                                      shape: const CircleBorder(),
-                                      onChanged: (isChecked) => _onChangeIsDone(
-                                          todo[index], isChecked),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8.0, vertical: 4.0),
+                                child: Row(
+                                  children: [
+                                    Transform.scale(
+                                      scale: 1.5,
+                                      child: Checkbox(
+                                        value: todo[index].isDone,
+                                        shape: const CircleBorder(),
+                                        onChanged: (isChecked) =>
+                                            _onChangeIsDone(
+                                                todo[index], isChecked),
+                                      ),
                                     ),
-                                  ),
-                                  Text(
-                                    todo[index].title,
-                                    style:
-                                        Theme.of(context).textTheme.titleMedium,
-                                  ),
-                                ],
+                                    Text(
+                                      todo[index].title,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium,
+                                    ),
+                                    Expanded(child: Container()),
+                                    Text(
+                                      todo[index].deadlineTime == null
+                                          ? ''
+                                          : formatDate.format(
+                                              todo[index].deadlineTime!),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           );
@@ -239,5 +290,29 @@ class _MyHomePageState extends State<MyHomePage> {
 
     final newData = todo.copyWith(isDone: isChecked);
     _todoRepository.update(newData);
+  }
+
+  void _onTodoLongPressed(Todo todo) async {
+    var result = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('確認'),
+        content: Text('「${todo.title}」を削除します'),
+        actions: <Widget>[
+          SimpleDialogOption(
+            child: const Text('キャンセル'),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          SimpleDialogOption(
+            child: const Text('削除'),
+            onPressed: () => Navigator.of(context).pop(true),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      _todoRepository.delete(todo.id);
+    }
   }
 }

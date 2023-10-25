@@ -19,6 +19,7 @@ dependencies:
   json_annotation: ^4.8.0
   intl: ^0.18.0
   get_it: ^7.2.0
+  chat_gpt_sdk: ^2.2.5
 
 dev_dependencies:
   flutter_test:

@@ -1,3 +1,4 @@
+import 'package:chat_gpt_sdk/chat_gpt_sdk.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_ai_app/repositories/todo_repository.dart';
@@ -51,13 +52,22 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final openAI = OpenAI.instance.build(
+    token: "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",
+    // isLogger: true,
+  );
+
+  final _textEditingController = TextEditingController(text: 'こんにちは？');
+  var _answer = "";
+  var _isLoading = false;
+
   static List<Color> colors = [
-    Colors.white.withOpacity(0.8),
+    // Colors.white.withOpacity(0.8),
     Colors.red.withOpacity(0.2),
-    Colors.green.withOpacity(0.2),
+    // Colors.green.withOpacity(0.2),
     Colors.blue.withOpacity(0.2),
     Colors.yellow.withOpacity(0.2),
-    Colors.cyan.withOpacity(0.2),
+    // Colors.cyan.withOpacity(0.2),
   ];
 
   String _title = '';
@@ -206,6 +216,7 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             TextField(
               onChanged: (value) => _title = value,
+              // controller: _textEditingController,
               keyboardType: TextInputType.multiline,
               maxLines: null,
               // can you add padding here?
@@ -285,9 +296,26 @@ class _MyHomePageState extends State<MyHomePage> {
                               }
                             },
                       child: const Text('追加')),
+                  ElevatedButton(
+                      onPressed: _title.isEmpty
+                          ? null
+                          : () async {
+                              final answer = await _sendMessage(
+                                _textEditingController.text,
+                              );
+                              setState(() {
+                                _answer = answer;
+                                _isLoading = false;
+                              });
+                              if (context.mounted) {
+                                Navigator.pop(context);
+                              }
+                            },
+                      child: const Text('AI')),
                 ],
               );
             }),
+            Text(_answer),
           ],
         );
       },
@@ -325,5 +353,18 @@ class _MyHomePageState extends State<MyHomePage> {
     if (result == true) {
       _todoRepository.delete(todo.id);
     }
+  }
+
+  Future<String> _sendMessage(String message) async {
+    // final request = await OpenAI.instance.chat.create();
+
+    final request = CompleteText(
+      prompt: message,
+      model: TextDavinci3Model(),
+      maxTokens: 200,
+    );
+
+    final response = await openAI.onCompletion(request: request);
+    return response!.choices.first.text;
   }
 }
